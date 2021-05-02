@@ -14,6 +14,42 @@ $ mix compile
 $ mix text
 ~~~
 
+## Design decisions
+
+### Adding new bid/ask
+
+* appends it at the begining of the bids/asks for the given pricing level
+* it is possible to add new bid/task with the same price but different quantity
+  * it was not clear what is the expected behaviour in such a case
+
+~~~iex
+iex(1)> OrderBook.new() |> OrderBook.add_bid(1, 50, 30) |> OrderBook.add_bid(1, 50, 40)
+%OrderBook{ask: %{}, bid: %{1 => [{50, 40}, {50, 30}]}}
+iex(2)> OrderBook.new() |> OrderBook.add_ask(1, 50, 30) |> OrderBook.add_ask(1, 50, 40)
+%OrderBook{ask: %{1 => [{50, 40}, {50, 30}]}, bid: %{}}
+~~~
+
+### Deleting bid/ask
+
+* deletes all existing bids/asks at the given pricing level and with the given price
+
+~~~iex
+iex(4)> OrderBook.new() |> OrderBook.add_bid(1, 50, 30) |> OrderBook.add_bid(1, 50, 40) |> OrderBook.delete_bid(1, 50)
+%OrderBook{ask: %{}, bid: %{1 => []}}
+iex(5)> OrderBook.new() |> OrderBook.add_ask(1, 50, 30) |> OrderBook.add_ask(1, 50, 40) |> OrderBook.delete_ask(1, 50)
+%OrderBook{ask: %{1 => []}, bid: %{}}
+~~~
+
+### Updating bid/ask
+
+* updates all existing bids/asks at the given pricing level and with the given price
+  * probably it does not make sense, although the requirement was not clear
+
+~~~iex
+iex(6)>  OrderBook.new() |> OrderBook.add_bid(1, 50, 30) |> OrderBook.add_bid(1, 50, 40) |> OrderBook.update_bid(1, 50, 60)
+%OrderBook{ask: %{}, bid: %{1 => [{50, 60}, {50, 60}]}}
+~~~
+
 ## Running
 
 ~~~bash
